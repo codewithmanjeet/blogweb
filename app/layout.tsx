@@ -1,4 +1,5 @@
 import "./globals.css";
+
 import Navbar from "./components/Navbar";
 import TopLoader from "./components/TopLoader";
 import SmoothScroll from "./components/SmoothScroll";
