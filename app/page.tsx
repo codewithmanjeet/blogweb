@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
@@ -61,41 +61,31 @@ export default function Home() {
           style={mainStyle}
         >
           <div style={containerStyle}>
-            <h1 className="hero-title" style={headingStyle}>
+            <h1 style={headingStyle}>
               Welcome To Hunting_Coder73 Blog Post
             </h1>
 
-            <p className="hero-para" style={paragraphStyle}>
-              <span className="highlight">Manjeet Chauhan</span> is a creative
+            <p style={paragraphStyle}>
+              <span style={highlightStyle}>Manjeet Chauhan</span> is a creative
               and hardworking individual from{" "}
-              <span className="highlight">Village Devsar</span> with a strong
+              <span style={highlightStyle}>Village Devsar</span> with a strong
               interest in technology and digital innovation. He enjoys learning
               new skills and turning ideas into practical projects, especially
               in{" "}
-              <span className="highlight-skill">
+              <span style={skillHighlightStyle}>
                 Website Design, JavaScript, React, and Next.js
               </span>.
             </p>
           </div>
         </motion.main>
       )}
-
-      <style jsx>{`
-        .highlight {
-          color: #facc15;
-          font-weight: 600;
-        }
-
-        .highlight-skill {
-          color: #38bdf8;
-          font-weight: 600;
-        }
-      `}</style>
     </>
   );
 }
 
-const loaderStyle = {
+/* ================= STYLES ================= */
+
+const loaderStyle: CSSProperties = {
   position: "fixed",
   inset: 0,
   background: "#111827",
@@ -107,13 +97,13 @@ const loaderStyle = {
   color: "white",
 };
 
-const counterStyle = {
+const counterStyle: CSSProperties = {
   fontSize: "60px",
   fontWeight: "bold",
   marginBottom: "20px",
 };
 
-const progressContainer = {
+const progressContainer: CSSProperties = {
   width: "250px",
   height: "6px",
   backgroundColor: "#374151",
@@ -121,13 +111,13 @@ const progressContainer = {
   overflow: "hidden",
 };
 
-const progressBar = {
+const progressBar: CSSProperties = {
   height: "100%",
   backgroundColor: "#38bdf8",
   transition: "width 0.2s ease",
 };
 
-const mainStyle = {
+const mainStyle: CSSProperties = {
   minHeight: "100vh",
   display: "flex",
   justifyContent: "center",
@@ -140,19 +130,29 @@ const mainStyle = {
   backgroundPosition: "center",
 };
 
-const containerStyle = {
+const containerStyle: CSSProperties = {
   maxWidth: "900px",
 };
 
-const headingStyle = {
+const headingStyle: CSSProperties = {
   fontSize: "48px",
   fontWeight: "700",
   marginBottom: "20px",
   color: "#ffffff",
 };
 
-const paragraphStyle = {
+const paragraphStyle: CSSProperties = {
   fontSize: "18px",
   lineHeight: "1.8",
   color: "#e5e7eb",
+};
+
+const highlightStyle: CSSProperties = {
+  color: "#facc15",
+  fontWeight: 600,
+};
+
+const skillHighlightStyle: CSSProperties = {
+  color: "#38bdf8",
+  fontWeight: 600,
 };
