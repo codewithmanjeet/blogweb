@@ -1,21 +1,41 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export async function GET() {
-  const { data, error } = await supabase
-    .from("userdetail")   // ✅ yaha correct table name
-    .select("*");
-
-  if (error) {
-    console.log("Supabase Error:", error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(data);
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error(
+    "Missing Supabase environment variables. Check Vercel settings."
+  );
 }
 
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+export async function GET() {
+  try {
+    const { data, error } = await supabase
+      .from("userdetail")
+      .select("*");
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(data ?? [], { status: 200 });
+
+  } catch (error) {
+
+    // Safe error handling without strict type issues
+    const message =
+      error instanceof Error ? error.message : "Unknown server error";
+
+    return NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
+  }
+}
