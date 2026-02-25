@@ -95,16 +95,19 @@ const loaderStyle: CSSProperties = {
   alignItems: "center",
   zIndex: 9999,
   color: "white",
+  padding: "20px",
 };
 
 const counterStyle: CSSProperties = {
-  fontSize: "60px",
+  fontSize: "clamp(40px, 8vw, 60px)",
   fontWeight: "bold",
   marginBottom: "20px",
+  textAlign: "center",
 };
 
 const progressContainer: CSSProperties = {
-  width: "250px",
+  width: "90%",
+  maxWidth: "300px",
   height: "6px",
   backgroundColor: "#374151",
   borderRadius: "10px",
@@ -118,12 +121,12 @@ const progressBar: CSSProperties = {
 };
 
 const mainStyle: CSSProperties = {
-  minHeight: "100vh",
+  minHeight: "100dvh", // mobile fix
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-  padding: "40px",
+  padding: "20px",
   backgroundImage:
     "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/bg.jpg')",
   backgroundSize: "cover",
@@ -132,17 +135,18 @@ const mainStyle: CSSProperties = {
 
 const containerStyle: CSSProperties = {
   maxWidth: "900px",
+  width: "100%",
 };
 
 const headingStyle: CSSProperties = {
-  fontSize: "48px",
+  fontSize: "clamp(28px, 6vw, 48px)",
   fontWeight: "700",
   marginBottom: "20px",
   color: "#ffffff",
 };
 
 const paragraphStyle: CSSProperties = {
-  fontSize: "18px",
+  fontSize: "clamp(14px, 4vw, 18px)",
   lineHeight: "1.8",
   color: "#e5e7eb",
 };
