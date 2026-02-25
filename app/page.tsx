@@ -32,12 +32,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             style={loaderStyle}
           >
-            <motion.h1
-              style={counterStyle}
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
+            <motion.h1 style={counterStyle}>
               {count}%
             </motion.h1>
 
@@ -102,7 +97,6 @@ const counterStyle: CSSProperties = {
   fontSize: "clamp(40px, 8vw, 60px)",
   fontWeight: "bold",
   marginBottom: "20px",
-  textAlign: "center",
 };
 
 const progressContainer: CSSProperties = {
@@ -121,16 +115,17 @@ const progressBar: CSSProperties = {
 };
 
 const mainStyle: CSSProperties = {
-  minHeight: "100dvh", // mobile fix
+  minHeight: "100dvh",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-  padding: "20px",
+  padding: "100px 20px 40px", // 🔥 navbar space added
   backgroundImage:
-    "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/bg.jpg')",
+    "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('/bg.jpg')",
   backgroundSize: "cover",
   backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
 };
 
 const containerStyle: CSSProperties = {
@@ -139,10 +134,11 @@ const containerStyle: CSSProperties = {
 };
 
 const headingStyle: CSSProperties = {
-  fontSize: "clamp(28px, 6vw, 48px)",
+  fontSize: "clamp(26px, 7vw, 48px)",
   fontWeight: "700",
   marginBottom: "20px",
   color: "#ffffff",
+  lineHeight: "1.2",
 };
 
 const paragraphStyle: CSSProperties = {
