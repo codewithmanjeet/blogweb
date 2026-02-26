@@ -39,7 +39,7 @@ export default function Navbar() {
       <style jsx>{`
         /* Sticky Navbar */
         nav {
-          position: sticky;
+          position: fixed;
           top: 0;
           z-index: 1000;
         }
