@@ -57,7 +57,7 @@ export default function Home() {
         >
           <div style={containerStyle}>
             <h1 style={headingStyle}>
-              Welcome To Hunting_Coder73 Manjeet Blog Post
+              Welcome To Hunting_Coder73 Blog Post
             </h1>
 
             <p style={paragraphStyle}>
