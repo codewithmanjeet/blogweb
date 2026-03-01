@@ -1,15 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Contact() {
   const [selectedSkill, setSelectedSkill] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const [alert, setAlert] = useState({
-    type: "",
-    message: "",
-  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,36 +29,34 @@ export default function Contact() {
     const phoneRegex = /^[0-9]{10}$/;
 
     if (!nameRegex.test(formData.name)) {
-      return "❌ Name must be only letters (Max 30 characters)";
+      toast.error("Name must contain only letters (Max 30)");
+      return false;
     }
 
     if (!emailRegex.test(formData.email)) {
-      return "❌ Please enter a valid email address";
+      toast.error("Please enter a valid email");
+      return false;
     }
 
     if (!phoneRegex.test(formData.phone)) {
-      return "❌ Phone number must be exactly 10 digits";
+      toast.error("Phone number must be 10 digits");
+      return false;
     }
 
     if (!selectedSkill) {
-      return "❌ Please select a skill";
+      toast.error("Please select a skill");
+      return false;
     }
 
-    return null;
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const errorMessage = validateForm();
-
-    if (errorMessage) {
-      setAlert({ type: "error", message: errorMessage });
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
-    setAlert({ type: "", message: "" });
 
     try {
       const res = await fetch("/api/contact", {
@@ -74,13 +68,8 @@ export default function Contact() {
         }),
       });
 
-      const data = await res.json();
-
       if (res.ok) {
-        setAlert({
-          type: "success",
-          message: "✅ Message Sent Successfully!",
-        });
+        toast.success("Message Sent Successfully 🚀");
 
         setFormData({
           name: "",
@@ -91,23 +80,13 @@ export default function Contact() {
 
         setSelectedSkill(null);
       } else {
-        setAlert({
-          type: "error",
-          message: data.message || "❌ Something went wrong",
-        });
+        toast.error("Something went wrong");
       }
     } catch (error) {
-      setAlert({
-        type: "error",
-        message: "❌ Server Error! Please try again.",
-      });
+      toast.error("Server Error! Try again.");
     }
 
     setLoading(false);
-
-    setTimeout(() => {
-      setAlert({ type: "", message: "" });
-    }, 4000);
   };
 
   return (
@@ -119,7 +98,6 @@ export default function Contact() {
 
         <form onSubmit={handleSubmit}>
           <div style={{ display: "grid", gap: "20px" }}>
-
             <div>
               <label style={labelStyle}>Full Name</label>
               <input
@@ -187,26 +165,6 @@ export default function Contact() {
             <button type="submit" style={buttonStyle} disabled={loading}>
               {loading ? "Sending..." : "Send Message 🚀"}
             </button>
-
-            {/* 🔥 ALERT NOW AT BOTTOM */}
-            {alert.message && (
-              <div
-                style={{
-                  marginTop: "10px",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  fontWeight: "500",
-                  textAlign: "center",
-                  backgroundColor:
-                    alert.type === "success" ? "#dcfce7" : "#fee2e2",
-                  color:
-                    alert.type === "success" ? "#166534" : "#991b1b",
-                }}
-              >
-                {alert.message}
-              </div>
-            )}
-
           </div>
         </form>
       </div>
@@ -235,7 +193,7 @@ function SkillToggle({ label, active, onClick }) {
   );
 }
 
-/* Styles */
+/* STYLES */
 const mainStyle = {
   minHeight: "100vh",
   backgroundColor: "#f9fafb",

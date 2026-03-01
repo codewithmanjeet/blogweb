@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ReactNode } from "react";
+import { Toaster } from "react-hot-toast";
 
 import Navbar from "./components/Navbar";
 import TopLoader from "./components/TopLoader";
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body style={{ margin: 0 }}>
+       <Toaster position="top-right" />
         <CustomCursor />
         <SmoothScroll />
         <TopLoader />
