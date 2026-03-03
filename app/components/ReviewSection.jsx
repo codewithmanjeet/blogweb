@@ -7,19 +7,16 @@ export default function ReviewSection() {
   const [reviews, setReviews] = useState([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
 
-  // unique user id (local storage)
-  const userId =
-    typeof window !== "undefined"
-      ? localStorage.getItem("reviewUserId") ||
-        localStorage.setItem(
-          "reviewUserId",
-          crypto.randomUUID()
-        )
-      : null;
+  // Create unique user id once
+  useEffect(() => {
+    if (!localStorage.getItem("reviewUserId")) {
+      localStorage.setItem("reviewUserId", crypto.randomUUID());
+    }
+  }, []);
 
-  // Fetch Reviews
   useEffect(() => {
     fetchReviews();
   }, []);
@@ -33,12 +30,11 @@ export default function ReviewSection() {
     setReviews(data || []);
   };
 
-  // Submit Review
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !message) {
-      alert("Please fill all fields");
+    if (!name || !message || rating === 0) {
+      alert("Please fill all fields and select rating");
       return;
     }
 
@@ -53,91 +49,84 @@ export default function ReviewSection() {
 
     setName("");
     setMessage("");
-    setRating(5);
+    setRating(0);
     fetchReviews();
   };
 
-  // Delete Review
   const handleDelete = async (id) => {
     await supabaseReview.from("reviews").delete().eq("id", id);
     fetchReviews();
   };
 
   return (
-    <div style={{ padding: "50px 20px", background: "#111827", color: "white" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "30px" }}>
-        ⭐ User Reviews
-      </h2>
+    <section style={sectionStyle}>
+      <h2 style={titleStyle}>💬 Customer Reviews</h2>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "auto" }}>
+      {/* FORM */}
+      <form onSubmit={handleSubmit} style={formStyle}>
         <input
           type="text"
           placeholder="Your Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          style={inputStyle}
         />
 
         <textarea
-          placeholder="Your Message"
+          placeholder="Write your review..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          style={textareaStyle}
         />
 
-        <select
-          value={rating}
-          onChange={(e) => setRating(e.target.value)}
-          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
-        >
-          <option value="5">5 ⭐</option>
-          <option value="4">4 ⭐</option>
-          <option value="3">3 ⭐</option>
-          <option value="2">2 ⭐</option>
-          <option value="1">1 ⭐</option>
-        </select>
+        {/* STAR RATING */}
+        <div style={starContainer}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHover(star)}
+              onMouseLeave={() => setHover(0)}
+              style={{
+                fontSize: "28px",
+                cursor: "pointer",
+                transition: "0.2s",
+                transform:
+                  star <= (hover || rating) ? "scale(1.2)" : "scale(1)",
+                color:
+                  star <= (hover || rating) ? "#facc15" : "#475569",
+              }}
+            >
+              ★
+            </span>
+          ))}
+        </div>
 
-        <button
-          type="submit"
-          style={{
-            padding: "10px 20px",
-            background: "#38bdf8",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
+        <button type="submit" style={buttonStyle}>
           Submit Review
         </button>
       </form>
 
-      {/* Review List */}
-      <div style={{ marginTop: "40px", maxWidth: "800px", marginInline: "auto" }}>
+      {/* REVIEWS */}
+      <div style={cardContainer}>
         {reviews.map((review) => (
-          <div
-            key={review.id}
-            style={{
-              background: "#1f2937",
-              padding: "15px",
-              marginBottom: "15px",
-              borderRadius: "8px",
-            }}
-          >
-            <h4>{review.name}</h4>
-            <p>{review.message}</p>
-            <p>{"⭐".repeat(review.rating)}</p>
+          <div key={review.id} style={cardStyle}>
+            <div style={cardHeader}>
+              <h4 style={{ margin: 0 }}>{review.name}</h4>
+              <div style={{ color: "#facc15" }}>
+                {"★".repeat(review.rating)}
+              </div>
+            </div>
+
+            <p style={{ marginTop: "10px", color: "#cbd5e1" }}>
+              {review.message}
+            </p>
 
             {review.user_id ===
               localStorage.getItem("reviewUserId") && (
               <button
                 onClick={() => handleDelete(review.id)}
-                style={{
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  padding: "5px 10px",
-                  cursor: "pointer",
-                }}
+                style={deleteBtn}
               >
                 Delete
               </button>
@@ -145,6 +134,98 @@ export default function ReviewSection() {
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
+
+/* ================= STYLES ================= */
+
+const sectionStyle = {
+  padding: "80px 20px",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
+  color: "white",
+};
+
+const titleStyle = {
+  textAlign: "center",
+  fontSize: "34px",
+  marginBottom: "50px",
+};
+
+const formStyle = {
+  maxWidth: "600px",
+  margin: "auto",
+  background: "rgba(255,255,255,0.06)",
+  padding: "30px",
+  borderRadius: "16px",
+  backdropFilter: "blur(15px)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+  marginBottom: "70px",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px",
+  marginBottom: "15px",
+  borderRadius: "10px",
+  border: "1px solid #334155",
+  background: "#1e293b",
+  color: "white",
+};
+
+const textareaStyle = {
+  ...inputStyle,
+  height: "110px",
+  resize: "none",
+};
+
+const starContainer = {
+  marginBottom: "20px",
+  display: "flex",
+  gap: "8px",
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: "12px",
+  background: "linear-gradient(90deg, #38bdf8, #0ea5e9)",
+  border: "none",
+  borderRadius: "10px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  color: "white",
+  transition: "0.3s",
+};
+
+const cardContainer = {
+  maxWidth: "900px",
+  margin: "auto",
+  display: "grid",
+  gap: "25px",
+};
+
+const cardStyle = {
+  background: "rgba(255,255,255,0.06)",
+  padding: "25px",
+  borderRadius: "16px",
+  backdropFilter: "blur(12px)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+  transition: "0.3s",
+};
+
+const cardHeader = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const deleteBtn = {
+  marginTop: "15px",
+  padding: "6px 14px",
+  background: "#ef4444",
+  border: "none",
+  borderRadius: "8px",
+  color: "white",
+  cursor: "pointer",
+};
