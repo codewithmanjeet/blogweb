@@ -1,24 +1,82 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // ✅ Check user on load + listen to auth changes
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // ✅ Google Login
+  const handleLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+  };
+
+  // ✅ Logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <>
       <nav style={navStyle}>
         <h2 style={logoStyle}>Hunting_Coder73</h2>
 
-        {/* Desktop Menu */}
         <div className="desktop-menu" style={desktopMenu}>
           <Link href="/" style={linkStyle}>Home</Link>
           <Link href="/about" style={linkStyle}>About</Link>
           <Link href="/blog" style={linkStyle}>Blog</Link>
           <Link href="/contact" style={linkStyle}>Contact</Link>
+
+          {/* ✅ Profile Image + Logout */}
+          {user ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {user.user_metadata?.avatar_url && (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt="profile"
+                  style={{
+                    width: "35px",
+                    height: "35px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
+
+              <button onClick={handleLogout} style={loginButton}>
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button onClick={handleLogin} style={loginButton}>
+              Login
+            </button>
+          )}
         </div>
 
-        {/* Hamburger Icon */}
         <div
           className="hamburger"
           style={hamburgerStyle}
@@ -28,23 +86,45 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* ✅ Mobile Menu */}
       <div className={`mobile-wrapper ${menuOpen ? "open" : ""}`}>
-        <Link href="/" style={mobileLink} onClick={() => setMenuOpen(false)}>Home</Link>
-        <Link href="/about" style={mobileLink} onClick={() => setMenuOpen(false)}>About</Link>
-        <Link href="/blog" style={mobileLink} onClick={() => setMenuOpen(false)}>Blog</Link>
-        <Link href="/contact" style={mobileLink} onClick={() => setMenuOpen(false)}>Contact</Link>
+        <Link href="/" style={mobileLink}>Home</Link>
+        <Link href="/about" style={mobileLink}>About</Link>
+        <Link href="/blog" style={mobileLink}>Blog</Link>
+        <Link href="/contact" style={mobileLink}>Contact</Link>
+
+        {user ? (
+          <>
+            {user.user_metadata?.avatar_url && (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="profile"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  marginTop: "10px",
+                }}
+              />
+            )}
+            <button onClick={handleLogout} style={mobileLoginButton}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <button onClick={handleLogin} style={mobileLoginButton}>
+            Login with Google
+          </button>
+        )}
       </div>
 
       <style jsx>{`
-        /* Sticky Navbar */
         nav {
           position: fixed;
           top: 0;
           z-index: 1000;
         }
 
-        /* Mobile Menu Animation */
         .mobile-wrapper {
           background-color: #111827;
           display: flex;
@@ -58,10 +138,9 @@ export default function Navbar() {
 
         .mobile-wrapper.open {
           padding: 20px;
-          max-height: 300px;
+          max-height: 350px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
           .desktop-menu {
             display: none !important;
@@ -70,7 +149,6 @@ export default function Navbar() {
             display: block !important;
           }
         }
-          
 
         @media (min-width: 769px) {
           .hamburger {
@@ -104,6 +182,7 @@ const logoStyle = {
 const desktopMenu = {
   display: "flex",
   gap: "20px",
+  alignItems: "center",
 };
 
 const hamburgerStyle = {
@@ -111,14 +190,12 @@ const hamburgerStyle = {
   color: "#ffffff",
   cursor: "pointer",
   display: "none",
-  transition: "0.3s",
 };
 
 const linkStyle = {
   color: "#d1d5db",
   textDecoration: "none",
   fontSize: "16px",
-  transition: "0.3s",
 };
 
 const mobileLink = {
@@ -126,4 +203,22 @@ const mobileLink = {
   textDecoration: "none",
   fontSize: "18px",
   padding: "5px 0",
+};
+
+const loginButton = {
+  backgroundColor: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "8px 15px",
+  borderRadius: "5px",
+  cursor: "pointer",
+};
+
+const mobileLoginButton = {
+  backgroundColor: "#2563eb",
+  color: "#fff",
+  border: "none",
+  padding: "10px",
+  borderRadius: "5px",
+  cursor: "pointer",
 };
