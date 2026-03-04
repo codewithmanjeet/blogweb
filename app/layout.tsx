@@ -11,6 +11,9 @@ import CustomCursor from "./components/CustomCursor";
 export const metadata = {
   title: "Hunting_Coder73 Blog",
   description: "Personal Blog Website",
+   icons: {
+    icon: "/titlelogo.svg",
+  },
 };
 
 export default function RootLayout({
