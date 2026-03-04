@@ -5,54 +5,99 @@ import { supabaseReview } from "../../lib/supabaseReview.js";
 
 export default function ReviewSection() {
   const [reviews, setReviews] = useState([]);
-  const [name, setName] = useState("");
+  const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
 
-  // Create unique user id once
+  // ================= GET USER SESSION =================
   useEffect(() => {
-    if (!localStorage.getItem("reviewUserId")) {
-      localStorage.setItem("reviewUserId", crypto.randomUUID());
-    }
-  }, []);
-
-  useEffect(() => {
+    getCurrentUser();
     fetchReviews();
+
+    const { data: listener } = supabaseReview.auth.onAuthStateChange(() => {
+      getCurrentUser();
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
+  const getCurrentUser = async () => {
+    const {
+      data: { session },
+    } = await supabaseReview.auth.getSession();
+
+    if (session?.user) {
+      console.log("FULL USER DATA:", session.user);
+      setUser(session.user);
+    } else {
+      setUser(null);
+    }
+  };
+
+  // ================= FETCH REVIEWS =================
   const fetchReviews = async () => {
-    const { data } = await supabaseReview
+    const { data, error } = await supabaseReview
       .from("reviews")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (error) {
+      console.log("Fetch Error:", error);
+    }
+
     setReviews(data || []);
   };
 
+  // ================= SUBMIT REVIEW =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !message || rating === 0) {
-      alert("Please fill all fields and select rating");
+    if (!user) {
+      alert("Please login first");
       return;
     }
 
-    await supabaseReview.from("reviews").insert([
+    if (!message || rating === 0) {
+      alert("Please write message & select rating");
+      return;
+    }
+
+    // ✅ STRONG AVATAR LOGIC
+    const avatar =
+      user.user_metadata?.avatar_url ||
+      user.user_metadata?.picture ||
+      user.identities?.[0]?.identity_data?.avatar_url ||
+      user.identities?.[0]?.identity_data?.picture ||
+      `https://ui-avatars.com/api/?name=${user.email}`;
+
+    console.log("Saving Avatar URL:", avatar);
+
+    const { error } = await supabaseReview.from("reviews").insert([
       {
-        name,
-        message,
-        rating,
-        user_id: localStorage.getItem("reviewUserId"),
+        name: user.user_metadata?.full_name || user.email,
+        message: message,
+        rating: rating,
+        avatar_url: avatar,
+        user_id: user.id,
       },
     ]);
 
-    setName("");
+    if (error) {
+      console.log("Insert Error:", error);
+      alert("Error saving review");
+    } else {
+      console.log("Review Saved Successfully");
+    }
+
     setMessage("");
     setRating(0);
     fetchReviews();
   };
 
+  // ================= DELETE REVIEW =================
   const handleDelete = async (id) => {
     await supabaseReview.from("reviews").delete().eq("id", id);
     fetchReviews();
@@ -62,57 +107,66 @@ export default function ReviewSection() {
     <section style={sectionStyle}>
       <h2 style={titleStyle}>💬 Customer Reviews</h2>
 
-      {/* FORM */}
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <input
-          type="text"
-          placeholder="Your Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={inputStyle}
-        />
+      {!user && (
+        <p style={{ textAlign: "center", marginBottom: "20px" }}>
+          Please login to write a review.
+        </p>
+      )}
 
-        <textarea
-          placeholder="Write your review..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          style={textareaStyle}
-        />
+      {user && (
+        <form onSubmit={handleSubmit} style={formStyle}>
+          <textarea
+            placeholder="Write your review..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            style={textareaStyle}
+          />
 
-        {/* STAR RATING */}
-        <div style={starContainer}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <span
-              key={star}
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHover(star)}
-              onMouseLeave={() => setHover(0)}
-              style={{
-                fontSize: "28px",
-                cursor: "pointer",
-                transition: "0.2s",
-                transform:
-                  star <= (hover || rating) ? "scale(1.2)" : "scale(1)",
-                color:
-                  star <= (hover || rating) ? "#facc15" : "#475569",
-              }}
-            >
-              ★
-            </span>
-          ))}
-        </div>
+          <div style={starContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span
+                key={star}
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHover(star)}
+                onMouseLeave={() => setHover(0)}
+                style={{
+                  fontSize: "28px",
+                  cursor: "pointer",
+                  color:
+                    star <= (hover || rating) ? "#facc15" : "#475569",
+                }}
+              >
+                ★
+              </span>
+            ))}
+          </div>
 
-        <button type="submit" style={buttonStyle}>
-          Submit Review
-        </button>
-      </form>
+          <button type="submit" style={buttonStyle}>
+            Submit Review
+          </button>
+        </form>
+      )}
 
-      {/* REVIEWS */}
       <div style={cardContainer}>
         {reviews.map((review) => (
           <div key={review.id} style={cardStyle}>
             <div style={cardHeader}>
-              <h4 style={{ margin: 0 }}>{review.name}</h4>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                <img
+                  src={
+                    review.avatar_url ||
+                    `https://ui-avatars.com/api/?name=${review.name}`
+                  }
+                  alt="user"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                  }}
+                />
+                <h4 style={{ margin: 0 }}>{review.name}</h4>
+              </div>
+
               <div style={{ color: "#facc15" }}>
                 {"★".repeat(review.rating)}
               </div>
@@ -122,8 +176,7 @@ export default function ReviewSection() {
               {review.message}
             </p>
 
-            {review.user_id ===
-              localStorage.getItem("reviewUserId") && (
+            {user && review.user_id === user.id && (
               <button
                 onClick={() => handleDelete(review.id)}
                 style={deleteBtn}
@@ -158,12 +211,10 @@ const formStyle = {
   background: "rgba(255,255,255,0.06)",
   padding: "30px",
   borderRadius: "16px",
-  backdropFilter: "blur(15px)",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
   marginBottom: "70px",
 };
 
-const inputStyle = {
+const textareaStyle = {
   width: "100%",
   padding: "12px",
   marginBottom: "15px",
@@ -171,10 +222,6 @@ const inputStyle = {
   border: "1px solid #334155",
   background: "#1e293b",
   color: "white",
-};
-
-const textareaStyle = {
-  ...inputStyle,
   height: "110px",
   resize: "none",
 };
@@ -188,13 +235,12 @@ const starContainer = {
 const buttonStyle = {
   width: "100%",
   padding: "12px",
-  background: "linear-gradient(90deg, #38bdf8, #0ea5e9)",
+  background: "#0ea5e9",
   border: "none",
   borderRadius: "10px",
   fontWeight: "bold",
   cursor: "pointer",
   color: "white",
-  transition: "0.3s",
 };
 
 const cardContainer = {
@@ -208,10 +254,6 @@ const cardStyle = {
   background: "rgba(255,255,255,0.06)",
   padding: "25px",
   borderRadius: "16px",
-  backdropFilter: "blur(12px)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-  transition: "0.3s",
 };
 
 const cardHeader = {
