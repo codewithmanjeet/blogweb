@@ -1,6 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function Blog() {
+
+  const router = useRouter();
+
+  const goToPayment = () => {
+    router.push("/blog/buy-html-course"); // ✅ Correct path
+  };
+
   return (
     <main
       style={{
@@ -20,6 +29,7 @@ export default function Blog() {
         >
           Web Development Basics
         </h1>
+
         <p style={{ fontSize: "16px", color: "#6b7280" }}>
           Learn the building blocks of modern websites
         </p>
@@ -34,29 +44,38 @@ export default function Blog() {
           margin: "0 auto",
         }}
       >
+        {/* HTML CARD */}
         <BlogCard
-          title="HTML (HyperText Markup Language)"
-          desc="HTML is the foundation of every website. It structures web content using headings, paragraphs, images and links. It is the skeleton of a webpage."
+          title="HTML Course Notes"
+          desc="If you want basic HTML notes to start your web development journey, click the button below and pay a small amount. After payment you will be able to read and download the HTML notes."
           date="HTML Basics"
+          buttonText="Buy HTML Notes"
+          onClick={goToPayment}
         />
 
+        {/* CSS CARD */}
         <BlogCard
           title="CSS (Cascading Style Sheets)"
-          desc="CSS is used to design and style websites. It controls colors, layout, spacing, fonts and responsiveness."
-          date="CSS Styling"
+          desc="CSS course notes are currently under development. These notes will help you learn styling, layouts and responsive design."
+          date="Coming Soon"
+          buttonText="Coming Soon"
+          disabled={true}
         />
 
+        {/* JS CARD */}
         <BlogCard
           title="JavaScript (JS)"
-          desc="JavaScript adds interactivity to websites like sliders, popups, form validation and dynamic updates."
-          date="JavaScript Power"
+          desc="JavaScript course notes are currently under development. Soon you will be able to learn JavaScript concepts and build interactive websites."
+          date="Coming Soon"
+          buttonText="Coming Soon"
+          disabled={true}
         />
       </div>
     </main>
   );
 }
 
-function BlogCard({ title, desc, date }) {
+function BlogCard({ title, desc, date, buttonText, onClick, disabled }) {
   return (
     <div
       style={{
@@ -67,7 +86,7 @@ function BlogCard({ title, desc, date }) {
         transition: "all 0.3s ease",
         display: "flex",
         flexDirection: "column",
-        height: "100%",   // important
+        height: "100%",
       }}
       className="card"
     >
@@ -96,20 +115,21 @@ function BlogCard({ title, desc, date }) {
         {desc}
       </p>
 
-      {/* Button Always Bottom */}
       <button
+        onClick={onClick}
+        disabled={disabled}
         style={{
-          marginTop: "auto",   // 🔥 magic line
+          marginTop: "auto",
           padding: "10px 18px",
           borderRadius: "8px",
           border: "none",
-          backgroundColor: "#6366f1",
+          backgroundColor: disabled ? "#9ca3af" : "#6366f1",
           color: "#ffffff",
           fontSize: "14px",
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
         }}
       >
-        Read More →
+        {buttonText}
       </button>
 
       <style jsx>{`

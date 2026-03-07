@@ -8,7 +8,7 @@ export default function ReviewSection() {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
+  const [hover, setHover] = useState(0);   
 
   // ================= GET USER SESSION =================
   useEffect(() => {
