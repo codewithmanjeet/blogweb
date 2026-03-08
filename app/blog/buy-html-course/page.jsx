@@ -6,36 +6,46 @@ export default function BuyHtmlCourse() {
 
   const handlePayment = async () => {
 
-    const res = await fetch("/api/create-order", {
-      method: "POST"
-    });
+    try {
 
-    const data = await res.json();
+      const res = await fetch("/api/create-order", {
+        method: "POST"
+      });
 
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: data.amount,
-      currency: "INR",
-      name: "HuntingCoder",
-      description: "HTML Course Notes",
-      order_id: data.id,
+      const data = await res.json();
 
-      handler: function (response) {
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: "INR",
+        name: "HuntingCoder",
+        description: "HTML Course Notes",
+        order_id: data.id,
 
-        console.log(response);
+        handler: function (response) {
 
-        alert("Payment Successful!");
+          console.log(response);
 
-        window.location.href = "/blog/payment-success";
-      },
+          alert("Payment Successful!");
 
-      theme: {
-        color: "#6366f1"
-      }
-    };
+          // ✔ Correct Redirect
+          window.location.href = "/blog/download-html-course";
 
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
+        },
+
+        theme: {
+          color: "#6366f1"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
+    } catch (error) {
+      console.error("Payment Error:", error);
+      alert("Payment failed. Please try again.");
+    }
+
   };
 
   return (
@@ -66,7 +76,7 @@ export default function BuyHtmlCourse() {
           </h2>
 
           <p style={{ marginBottom: "20px", color: "#6b7280" }}>
-            Pay ₹10 to unlock HTML notes and download them.
+            Pay ₹1 to unlock HTML notes and download them.
           </p>
 
           <button
@@ -81,7 +91,7 @@ export default function BuyHtmlCourse() {
               cursor: "pointer",
             }}
           >
-            Pay ₹10
+            Pay ₹1
           </button>
         </div>
       </div>
