@@ -6,6 +6,11 @@ export default function BuyCourse(){
 
 const handlePayment = async () => {
 
+if(!window.Razorpay){
+alert("Razorpay SDK failed to load")
+return
+}
+
 const order = await fetch("/api/create-order",{
 method:"POST"
 })
@@ -68,6 +73,10 @@ script.src="https://checkout.razorpay.com/v1/checkout.js"
 
 script.async=true
 
+script.onload = () => {
+console.log("Razorpay Loaded")
+}
+
 document.body.appendChild(script)
 
 },[])
@@ -90,11 +99,9 @@ borderRadius:"14px",
 boxShadow:"0px 15px 40px rgba(0,0,0,0.6)",
 textAlign:"center",
 color:"white",
-// marginTop: "8%",
 marginBlock: "2%",
 position: "absolute",
 top: "12%",
-
 }}>
 
 <img 
@@ -103,7 +110,6 @@ style={{
 width:"28%",
 borderRadius:"10px",
 marginBottom:"20px",
-
 }}
 />
 
@@ -166,6 +172,16 @@ color:"#9ca3af"
 }}>
 Secure payment powered by Razorpay
 </p>
+
+</div>
+
+<div style={{padding:"100px"}}>
+
+<h1>Buy HTML Course</h1>
+
+<button onClick={handlePayment}>
+Pay ₹1
+</button>
 
 </div>
 
