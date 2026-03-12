@@ -90,8 +90,11 @@ borderRadius:"14px",
 boxShadow:"0px 15px 40px rgba(0,0,0,0.6)",
 textAlign:"center",
 color:"white",
-marginTop: "10%",
-marginBlock: "2%"
+// marginTop: "8%",
+marginBlock: "2%",
+position: "absolute",
+top: "12%",
+
 }}>
 
 <img 
